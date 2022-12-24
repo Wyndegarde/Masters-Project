@@ -1,4 +1,4 @@
-from .ann import AnnNet
-from .cnn import CnnNet
+from .ann_net import AnnNet
+from .cnn_net import CnnNet
 from .snn_net import SnnNet
-from .scnn import ScnnNet
+from .scnn_net import ScnnNet

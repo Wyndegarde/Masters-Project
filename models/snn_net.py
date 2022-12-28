@@ -1,39 +1,38 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 import snntorch as snn
-from snntorch import surrogate
-from snntorch import spikegen
-import snntorch.spikeplot as splt
 
+from config import ModelParameters, TrainingParameters
 
 # Define Network
 class SnnNet(nn.Module):
     def __init__(
         self,
-        res: int,
-        spike_grad: float,
-        num_hidden: int,
-        num_outputs: int,
-        beta: float,
-        batch_size: int,
-        num_steps: int,
+        res: int = ModelParameters.RESOLUTION,
+        spike_grad: float = ModelParameters.SPIKE_GRADIENT,
+        num_hidden: int = ModelParameters.NUM_HIDDEN,
+        num_outputs: int = ModelParameters.NUM_OUTPUTS,
+        beta: float = ModelParameters.BETA,
+        batch_size: int = TrainingParameters.BATCH_SIZE,
+        num_steps: int = ModelParameters.NUM_STEPS,
     ):
         super().__init__()
 
-        self.batch_size = batch_size
-        self.num_steps = num_steps
+        self.res = res
+        self.spike_grad = spike_grad
         self.num_hidden = num_hidden
         self.num_outputs = num_outputs
+        self.beta = beta
+        self.batch_size = batch_size
+        self.num_steps = num_steps
 
         # Initialize layers
-        self.fc1 = nn.Linear(res * res, num_hidden)
-        self.lif1 = snn.Leaky(beta=beta, spike_grad=spike_grad)
-        self.fc2 = nn.Linear(num_hidden, num_hidden)
-        self.lif2 = snn.Leaky(beta=beta, spike_grad=spike_grad)
-        self.fc3 = nn.Linear(num_hidden, num_outputs)
-        self.lif3 = snn.Leaky(beta=beta, spike_grad=spike_grad)
+        self.fc1 = nn.Linear(self.res * self.res, self.num_hidden)
+        self.lif1 = snn.Leaky(beta=self.beta, spike_grad=self.spike_grad)
+        self.fc2 = nn.Linear(self.num_hidden, self.num_hidden)
+        self.lif2 = snn.Leaky(beta=self.beta, spike_grad=self.spike_grad)
+        self.fc3 = nn.Linear(self.num_hidden, self.num_outputs)
+        self.lif3 = snn.Leaky(beta=self.beta, spike_grad=self.spike_grad)
 
     def forward(self, x):
         # Initialize hidden states + output spike at t=0

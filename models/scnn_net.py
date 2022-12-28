@@ -3,29 +3,32 @@ from typing import List
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 import snntorch as snn
+
+from config import ModelParameters, TrainingParameters
+from utils import Utilities
 
 
 # Define a different network
 class ScnnNet(nn.Module):
     def __init__(
         self,
-        spike_grad: float,
-        beta: float,
-        batch_size: int,
-        num_steps: int,
-        conv_kernel_size: int,
-        conv_padding_size: int,
-        mp_kernel_size: int,
-        mp_stride_length: int,
-        dropout: float,
-        num_hidden: int,
-        num_outputs: int,
-        output_sizes: List[int],
+        res: int = ModelParameters.RESOLUTION,
+        spike_grad: float = ModelParameters.SPIKE_GRADIENT,
+        beta: float = ModelParameters.BETA,
+        batch_size: int = TrainingParameters.BATCH_SIZE,
+        num_steps: int = ModelParameters.NUM_STEPS,
+        conv_kernel_size: int = ModelParameters.CONV_KERNEL_SIZE,
+        conv_padding_size: int = ModelParameters.CONV_PADDING_SIZE,
+        mp_kernel_size: int = ModelParameters.MP_KERNEL_SIZE,
+        mp_stride_length: int = ModelParameters.MP_STRIDE_LENGTH,
+        dropout: float = ModelParameters.DROPOUT,
+        num_hidden: int = ModelParameters.NUM_HIDDEN,
+        num_outputs: int = ModelParameters.NUM_OUTPUTS,
     ):
         super().__init__()
 
+        self.res = res
         self.spike_grad = spike_grad
         self.beta = beta
         self.batch_size = batch_size
@@ -37,14 +40,21 @@ class ScnnNet(nn.Module):
         self.dropout = dropout
         self.num_hidden = num_hidden
         self.num_outputs = num_outputs
-        self.output_sizes = output_sizes
 
+        self.output_sizes: List[int] = Utilities.get_output_sizes(
+            self.res,
+            self.conv_kernel_size,
+            self.conv_padding_size,
+            self.mp_kernel_size,
+            self.mp_stride_length,
+        )
+        # Do I change channels to a variable incase I end up with RGB images? ## Padding = 0 as all information is at the centre of image (may change if lower resolution)
         self.conv1 = nn.Conv2d(
             in_channels=1,
             out_channels=64,
             kernel_size=self.conv_kernel_size,
             padding=self.conv_padding_size,
-        )  # Do I change channels to a variable incase I end up with RGB images? ## Padding = 0 as all information is at the centre of image (may change if lower resolution)
+        )
         self.mp1 = nn.MaxPool2d(
             kernel_size=self.mp_kernel_size, stride=self.mp_stride_length
         )

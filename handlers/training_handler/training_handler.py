@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Tuple
 from collections import defaultdict
 import time
 
@@ -59,7 +59,7 @@ class TrainingHandler:
         print("Starting Training")
 
         for epoch in range(self.epochs):
-
+            
             # Instantiate metrics for each epoch
             correct: float = 0.0
             avg_train_loss: float = 0.0
@@ -229,6 +229,7 @@ class TrainingHandler:
             avg_train_loss = 0
             correct = 0
             avg_valid_loss, valid_correct = 0, 0
+
             self.model.train()
             for batch, (data_it, targets_it) in enumerate(self.train_loader):
                 data_it = data_it.to(self.device)
@@ -323,3 +324,159 @@ class TrainingHandler:
                 print(
                     f"Validation Results, Epoch {t+1}: \n Accuracy: {(valid_accuracy):>0.1f}%, Avg loss: {avg_valid_loss.item():>8f} \n"
                 )
+
+    def train_spiking_cnn(self):
+        start_time = time.time()
+        print('Starting Training')
+
+
+        for t in range(self.epochs):
+            
+            avg_train_loss = 0
+            correct = 0
+            avg_test_loss, test_correct = 0, 0
+            self.model.train()
+            for batch, (data_it, targets_it) in enumerate(self.train_loader):
+                data_it = data_it.to(self.device)
+                targets_it = targets_it.to(self.device)
+
+                self.optimizer.zero_grad()
+                
+                # Compute prediction and loss
+                spike_data = spikegen.rate(data_it, num_steps=self.num_steps, gain=1, offset=0)
+                spk_targets_it = torch.clamp(spikegen.to_one_hot(targets_it, 10) * 1.05, min=0.05)
+                
+                spk_rec, mem_rec = self.model(spike_data.view(self.num_steps,self.batch_size, 1,self.res,self.res)) 
+                
+                # Sum loss over time steps: BPTT
+                loss = torch.zeros((1), dtype=self.dtype, device=self.device)   # creates a 1D tensor to store total loss over time. 
+                for step in range(self.num_steps):
+                    loss += self.loss_fn(mem_rec[step], spk_targets_it) # Loss at each time step is added to give total loss.
+
+                avg_train_loss += loss
+                
+                _, predicted = spk_rec.sum(dim=0).max(1) 
+                correct += (predicted == targets_it).type(torch.float).sum().item()
+
+                # Backpropagation
+                loss.backward()
+                self.optimizer.step()
+
+            avg_train_loss /= self.train_num_batches
+            accuracy = correct / self.train_size * 100      
+            self.history['avg_train_loss'].append(avg_train_loss.item())
+            self.history['train_accuracy'].append(accuracy)
+            
+            if self.verbose == True: 
+                print(f"Epoch {t+1} of {self.epochs}")
+                print('-' * 15)
+                print(f"Training Results, Epoch {t+1}:\n Accuracy: {(accuracy):>0.1f}%, Avg loss: {avg_train_loss.item():>8f} \n")
+
+                ###################### TEST LOOP ##############################
+            self.model.eval()
+            with torch.no_grad():
+                for test_data_it, test_targets_it in self.valid_loader:
+                    test_data_it = test_data_it.to(self.device)
+                    test_targets_it = test_targets_it.to(self.device)
+                    
+                    test_spike_data = spikegen.rate(test_data_it, num_steps=self.num_steps, gain=1, offset=0)
+                    test_spk_targets_it = torch.clamp(spikegen.to_one_hot(targets_it, 10) * 1.05, min=0.05)
+
+                    test_spk_rec, test_mem_rec = self.model(test_spike_data.view(self.num_steps,self.batch_size, 1, self.resolution, self.resolution)) 
+                    
+                    test_loss = torch.zeros((1),dtype = self.dtype, device = self.device)    
+                    for step in range(self.num_steps):
+                        test_loss += self.loss_fn(test_mem_rec[step], test_spk_targets_it)
+                    
+                    avg_test_loss += test_loss
+                    
+                    
+                    _, test_predicted = test_spk_rec.sum(dim=0).max(1)
+                    test_correct += (test_predicted == test_targets_it).type(torch.float).sum().item()
+            
+
+            avg_test_loss /= self.test_num_batches
+            test_accuracy = test_correct / self.test_size * 100
+                
+            self.history['avg_valid_loss'].append(avg_test_loss.item())
+            self.history['vtest_accuracy'].append(test_accuracy)
+            
+            if self.verbose == True: 
+                print(f"Validation Results, Epoch {t+1}: \n Accuracy: {(self.valid_accuracy):>0.1f}%, Avg loss: {self.avg_valid_loss.item():>8f} \n")
+
+
+        print("Done!")
+        print(f"Final Train Accuracy: {(accuracy):>0.1f}%, and Avg loss: {avg_train_loss.item():>8f} \n")
+        print(f"Final Validation Accuracy: {(self.valid_accuracy):>0.1f}%, and Avg loss: {self.avg_valid_loss.item():>8f} \n")
+        current_time = time.time()
+        total = current_time - start_time
+        print(f'Training time: {round(total/60,2)} minutes')
+        return self.history
+
+
+    def _training_loop(self) -> Tuple[float,float]:
+        correct: float = 0.0
+        avg_train_loss: float = 0.0
+
+        self.model.train()
+        for _, (train_data, train_labels) in enumerate(self.train_loader):
+            # Zero out the gradients before passing to model
+            self.optimizer.zero_grad()
+
+            train_data = train_data.to(self.device)
+            train_labels = train_labels.to(self.device)
+
+            # Get model output
+            pred = self.model(train_data)
+
+            # Calculate metrics for each batch
+            loss: Tensor = self.loss_fn(pred, train_labels)
+
+            correct += (
+                (pred.argmax(1) == train_labels).type(torch.float).sum().item()
+            )
+
+            avg_train_loss += loss.item()
+
+            # Backpropagation
+            loss.backward()
+            self.optimizer.step()
+
+        return (avg_train_loss, correct)
+
+    def _spiking_training_loop(self):
+
+        for batch, (data_it, targets_it) in enumerate(self.train_loader):
+            data_it = data_it.to(self.device)
+            targets_it = targets_it.to(self.device)
+
+            self.optimizer.zero_grad()
+            
+            spike_data, spk_targets_it = self._rate_encoding(data_it, targets_it)
+            
+            spk_rec, mem_rec = self.model(spike_data)
+            
+            # Sum loss over time steps: BPTT
+            loss = torch.zeros((1), dtype=self.dtype, device=self.device)   # creates a 1D tensor to store total loss over time. 
+            for step in range(self.num_steps):
+                loss += self.loss_fn(mem_rec[step], spk_targets_it) # Loss at each time step is added to give total loss.
+
+            avg_train_loss += loss
+            
+            _, predicted = spk_rec.sum(dim=0).max(1) 
+            correct += (predicted == targets_it).type(torch.float).sum().item()
+
+            # Backpropagation
+            loss.backward()
+            self.optimizer.step()
+
+    
+    def _rate_encoding(self, data, targets):
+
+        # convert data to rate encoded spikes.
+        spike_data = spikegen.rate(data, num_steps=self.num_steps, gain=1, offset=0)
+        spk_targets = torch.clamp(spikegen.to_one_hot(targets, 10) * 1.05, min=0.05)
+
+        spike_data_view = spike_data.view(self.num_steps,self.batch_size, 1,self.res,self.res)
+
+        return spike_data_view, spk_targets

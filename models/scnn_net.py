@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Tuple
 
 import torch
+from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 import snntorch as snn
@@ -112,7 +113,7 @@ class ScnnNet(nn.Module):
         self.fc3 = nn.Linear(self.num_hidden, self.num_outputs)
         self.lif8 = snn.Leaky(beta=self.beta, spike_grad=self.spike_grad)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
 
         spk1, mem1 = self.lif1.init_leaky(
             self.batch_size, 64, self.output_sizes[0], self.output_sizes[0]
@@ -138,6 +139,9 @@ class ScnnNet(nn.Module):
 
         spk8_rec = []
         mem8_rec = []
+
+        # Reshape x to be (num_steps, batch_size, channels, height, width)
+        x = x.view(self.num_steps, self.batch_size, 1, self.res, self.res)
 
         for step in range(self.num_steps):
             cur1 = self.mp1(self.conv1(x[step]))

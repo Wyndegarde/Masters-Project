@@ -22,6 +22,8 @@ def main(model_type: str = "ANN"):
     torch.manual_seed(Config.SEED)
     np.random.seed(Config.SEED)
 
+    log.info(f"Using {Config.DEVICE} as device")
+
     data_handler = DataHandler()
 
     train_data, validation_data = data_handler.load_in_data()
@@ -30,15 +32,17 @@ def main(model_type: str = "ANN"):
         case "ANN":
             model: nn.Module = AnnNet()
         case "CNN":
-            model: nn.Module = CnnNet()  # type: ignore
+            model = CnnNet()
         case "SNN":
-            model: nn.Module = SnnNet()  # type: ignore
+            model = SnnNet()
         case "SCNN":
-            model: nn.Module = ScnnNet()  # type: ignore
+            model = ScnnNet()
         case _:
             raise ValueError("Model type not recognised")
 
-    training_handler = TrainingHandler(train_data, validation_data, model)
+    spiking_model: bool = model_type in ["SNN", "SCNN"]
+
+    training_handler = TrainingHandler(train_data, validation_data, model, spiking_model=spiking_model)
 
     history = training_handler.train_model()
 

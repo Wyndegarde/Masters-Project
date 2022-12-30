@@ -1,0 +1,5 @@
+2022-12-30 15:24:56.783 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
+2022-12-30 15:40:26.862 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
+2022-12-30 15:43:34.514 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
+2022-12-30 15:59:15.244 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
+2022-12-30 16:01:28.240 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device

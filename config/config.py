@@ -6,6 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from snntorch import surrogate
+
 
 class Config:
 
@@ -48,7 +50,8 @@ class ModelParameters:
     DROPOUT: float = 0.25
 
     # SNN parameters
-    SPIKE_GRADIENT: float = 0.1
+    SLOPE: int = 5
+    SPIKE_GRADIENT: surrogate = surrogate.fast_sigmoid(slope = SLOPE)
     NUM_STEPS: int = 10
     TIME_STEP: float = 1e-3
     TAU_MEM: float = 2e-2
@@ -64,6 +67,7 @@ class TrainingParameters:
     LEARNING_RATE: float = 5e-4
     BETAS: Tuple[float, float] = (0.9, 0.999)
     LOSS_FUNCTION: nn.NLLLoss = nn.NLLLoss()
+    SPIKING_LOSS_FUNCTION = nn.MSELoss()
 
 
 class PathSettings:

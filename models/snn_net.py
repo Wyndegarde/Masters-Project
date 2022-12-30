@@ -1,4 +1,7 @@
+from typing import Tuple
+
 import torch
+from torch import Tensor
 import torch.nn as nn
 import snntorch as snn
 
@@ -15,7 +18,7 @@ class SnnNet(nn.Module):
         beta: float = ModelParameters.BETA,
         batch_size: int = TrainingParameters.BATCH_SIZE,
         num_steps: int = ModelParameters.NUM_STEPS,
-    ):
+    ) -> None:
         super().__init__()
 
         self.res = res
@@ -34,15 +37,20 @@ class SnnNet(nn.Module):
         self.fc3 = nn.Linear(self.num_hidden, self.num_outputs)
         self.lif3 = snn.Leaky(beta=self.beta, spike_grad=self.spike_grad)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tuple[Tensor,Tensor]:
         # Initialize hidden states + output spike at t=0
-        spk1, mem1 = self.lif1.init_leaky(self.batch_size, self.num_hidden)
-        spk2, mem2 = self.lif2.init_leaky(self.batch_size, self.num_hidden)
-        spk3, mem3 = self.lif3.init_leaky(self.batch_size, self.num_outputs)
+        mem1 = self.lif1.init_leaky()
+        mem2 = self.lif2.init_leaky()
+        mem3 = self.lif3.init_leaky()
+        # spk1, mem1 = self.lif1.init_leaky(self.batch_size, self.num_hidden)
+        # spk2, mem2 = self.lif2.init_leaky(self.batch_size, self.num_hidden)
+        # spk3, mem3 = self.lif3.init_leaky(self.batch_size, self.num_outputs)
 
         spk3_rec = []
         mem3_rec = []
 
+        # Reshape input to (num_steps, batch_size, res*res)
+        x = x.view(self.num_steps,self.batch_size, -1)
         for step in range(self.num_steps):
             cur1 = self.fc1(x[step])
             spk1, mem1 = self.lif1(cur1, mem1)

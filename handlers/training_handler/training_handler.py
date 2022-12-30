@@ -45,7 +45,7 @@ class TrainingHandler:
         self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
             self.optimizer, milestones=[50], gamma=0.5
         )
-        
+
         self.dtype = torch.float
         self.num_steps = ModelParameters.NUM_STEPS
 
@@ -72,9 +72,7 @@ class TrainingHandler:
 
             avg_valid_loss, valid_correct = self._validation_loop()
 
-            self.add_metrics_to_history(
-                avg_train_loss, correct, avg_valid_loss, valid_correct
-            )
+
             # Calculate average training loss and accuracy
             avg_train_loss /= self.train_num_batches
             accuracy = correct / self.train_size * 100
@@ -83,14 +81,10 @@ class TrainingHandler:
             avg_valid_loss /= self.valid_num_batches
             valid_accuracy = valid_correct / self.valid_size * 100
 
-            # Store metric history for future plotting after going through all batches
-            self.history["avg_train_loss"].append(avg_train_loss)
-            self.history["train_accuracy"].append(accuracy)
-            self.history["avg_valid_loss"].append(avg_valid_loss)
-            self.history["valid_accuracy"].append(valid_accuracy)
-
-            self.scheduler.step()
-
+            self.add_metrics_to_history(
+                avg_train_loss, correct, avg_valid_loss, valid_correct
+            )
+                
             if self.verbose == True:
                 TrainingServices.print_epoch_metrics(
                     epoch,
@@ -100,6 +94,8 @@ class TrainingHandler:
                     avg_valid_loss,
                     valid_accuracy,
                 )
+
+            self.scheduler.step()
 
         end_time = time.time()
         TrainingServices.print_final_metrics(
@@ -122,7 +118,7 @@ class TrainingHandler:
             if self.spiking_model:
 
                 predicted, loss = self._spiking_training_loop(train_data, train_labels)
-
+                correct += (predicted == train_labels).type(torch.float).sum().item()
             else:
                 # Get model output
                 predicted = self.model(train_data)
@@ -130,10 +126,10 @@ class TrainingHandler:
                 # Calculate metrics for each batch
                 loss = self.loss_fn(predicted, train_labels)
 
-            # Add to metrics # ! issue here when running SNN
-            correct += (
-                (predicted.argmax(1) == train_labels).type(torch.float).sum().item()
-            )
+                # Add to metrics
+                correct += (
+                    (predicted.argmax(1) == train_labels).type(torch.float).sum().item()
+                )
             avg_train_loss += loss.item()
 
             # Backpropagation
@@ -175,21 +171,25 @@ class TrainingHandler:
                     valid_predicted, valid_loss = self._spiking_training_loop(
                         valid_data, valid_labels
                     )
+                    valid_correct += (
+                        (valid_predicted == valid_labels).type(torch.float).sum().item()
+                    )
                 else:
                     # Get model output
                     valid_predicted = self.model(valid_data)
 
                     # Calculate metrics for each batch
                     valid_loss = self.loss_fn(valid_predicted, valid_labels)
+                    valid_correct += (
+                        (valid_predicted.argmax(1) == valid_labels)
+                        .type(torch.float)
+                        .sum()
+                        .item()
+                    )
 
                 # Calculate average loss
                 avg_valid_loss += valid_loss.item()
-                valid_correct += (
-                    (valid_predicted.argmax(1) == valid_labels)
-                    .type(torch.float)
-                    .sum()
-                    .item()
-                )
+
             return (avg_valid_loss, valid_correct)
 
     def _rate_encoding(self, data, targets):
@@ -198,17 +198,15 @@ class TrainingHandler:
         spike_data = spikegen.rate(data, num_steps=self.num_steps, gain=1, offset=0)
         spk_targets = torch.clamp(spikegen.to_one_hot(targets, 10) * 1.05, min=0.05)
 
-        # # ! Could be differences between how to use view method for snn and scnn.
-        # spike_data_view = spike_data.view(
-        #     self.num_steps, self.batch_size, 1, self.res, self.res
-        # )
-
         return spike_data, spk_targets
 
-    def add_metrics_to_history(self, avg_train_loss, correct, avg_valid_loss, valid_correct):
-
+    def add_metrics_to_history(
+        self, avg_train_loss, accuracy, avg_valid_loss, valid_accuracy
+    ):
 
         self.history["avg_train_loss"].append(avg_train_loss)
-        self.history["train_accuracy"].append(correct / self.train_size * 100)
+        self.history["train_accuracy"].append(accuracy)
         self.history["avg_valid_loss"].append(avg_valid_loss)
-        self.history["valid_accuracy"].append(valid_correct / self.valid_size * 100)
+        self.history["valid_accuracy"].append(valid_accuracy)
+
+

@@ -1,6 +1,7 @@
 from typing import Any, Tuple
 from collections import defaultdict
 import time
+from loguru import logger as log
 
 import torch
 import torch.nn as nn
@@ -11,8 +12,14 @@ from snntorch import spikegen
 import snntorch.spikeplot as splt
 
 from services import TrainingServices
-from config import Config, TrainingParameters, ModelParameters
+from config import Config, LoguruSettings,TrainingParameters, ModelParameters
 
+log.add(
+    LoguruSettings.TRAINING_HANDLER_LOG,
+    format=LoguruSettings.format,
+    rotation=LoguruSettings.ROTATION,
+    enqueue=True,
+)
 
 class TrainingHandler:
     def __init__(
@@ -22,7 +29,8 @@ class TrainingHandler:
         model: nn.Module,
         device: str = Config.DEVICE,
         epochs: int = TrainingParameters.EPOCHS,
-        loss_fn: Any = TrainingParameters.SPIKING_LOSS_FUNCTION,
+        loss_fn: Any = TrainingParameters.LOSS_FUNCTION,
+        num_steps: int = ModelParameters.NUM_STEPS,
         verbose: bool = True,
         spiking_model: bool = False,
     ) -> None:
@@ -33,6 +41,7 @@ class TrainingHandler:
         self.model = model.to(self.device)
         self.epochs = epochs
         self.loss_fn = loss_fn
+        self.num_steps = num_steps
         self.verbose = verbose
         self.spiking_model = spiking_model
 
@@ -47,7 +56,6 @@ class TrainingHandler:
         )
 
         self.dtype = torch.float
-        self.num_steps = ModelParameters.NUM_STEPS
 
         # ? Ingoring the types here as the len method for Datasets are weird.
         # Training variables.
@@ -98,6 +106,10 @@ class TrainingHandler:
             self.scheduler.step()
 
         end_time = time.time()
+        time_taken = (end_time - start_time) / 60
+
+        log.success(f"Training completed in {time_taken} minutes")
+        
         TrainingServices.print_final_metrics(
             accuracy, avg_train_loss, valid_accuracy, avg_valid_loss
         )

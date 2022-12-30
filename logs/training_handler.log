@@ -1,0 +1,6 @@
+2022-12-30 20:22:26.617 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
+2022-12-30 20:25:47.254 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-30 20:25:47.316 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 51 | Training a Deep Nueral Network
+2022-12-30 20:26:10.718 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-30 20:26:10.780 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 51 | Training a Deep Nueral Network
+2022-12-30 20:27:04.839 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 111 | Training completed in 0.8986397425333659 minutes

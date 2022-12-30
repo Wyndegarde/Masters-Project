@@ -1,3 +1,4 @@
+from typing import Any
 from loguru import logger as log
 
 import torch
@@ -5,7 +6,7 @@ import torch.nn as nn
 import numpy as np
 import inquirer
 
-from config import Config, LoguruSettings
+from config import Config, LoguruSettings, TrainingParameters
 from handlers import DataHandler, TrainingHandler
 from models import AnnNet, CnnNet, SnnNet, ScnnNet
 
@@ -40,9 +41,21 @@ def main(model_type: str = "ANN"):
         case _:
             raise ValueError("Model type not recognised")
 
-    spiking_model: bool = model_type in ["SNN", "SCNN"]
+    if model_type in ["SNN", "SCNN"]:
+        log.info("Training a Spiking Nueral Network")
 
-    training_handler = TrainingHandler(train_data, validation_data, model, spiking_model=spiking_model)
+        # define the spiking model specific parameters
+        spiking_model: bool = True
+        loss_fn: Any = nn.MSELoss()
+    else:
+        log.info("Training a Deep Nueral Network")
+
+        spiking_model = False
+        loss_fn = TrainingParameters.LOSS_FUNCTION
+
+    training_handler = TrainingHandler(
+        train_data, validation_data, model, loss_fn=loss_fn, spiking_model=spiking_model
+    )
 
     history = training_handler.train_model()
 

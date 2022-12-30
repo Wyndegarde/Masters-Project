@@ -30,6 +30,7 @@ class LoguruSettings:
 
     # Loguru filepaths
     MAIN_LOG: str = "logs/main.log"
+    TRAINING_HANDLER_LOG: str = "logs/training_handler.log"
 
 
 class ModelParameters:
@@ -67,7 +68,6 @@ class TrainingParameters:
     LEARNING_RATE: float = 5e-4
     BETAS: Tuple[float, float] = (0.9, 0.999)
     LOSS_FUNCTION: nn.NLLLoss = nn.NLLLoss()
-    SPIKING_LOSS_FUNCTION = nn.MSELoss()
 
 
 class PathSettings:

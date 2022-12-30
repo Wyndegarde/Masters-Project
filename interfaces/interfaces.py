@@ -11,7 +11,7 @@ class BatchMetrics:
 
 
 @dataclass
-class EpochMetrics:
+class TrainingMetrics:
     train_correct: List[float]
     train_loss: List[float]
     valid_correct: List[float]
@@ -19,7 +19,7 @@ class EpochMetrics:
 
 
 @dataclass
-class TrainingMetrics:
+class EpochMetrics:
     train_loss: float
     train_accuracy: float
     valid_loss: float

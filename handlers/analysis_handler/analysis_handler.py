@@ -53,17 +53,3 @@ class AnalysisHandler:
         ax2.set_xlabel("Epoch", fontsize=16)
         fig.suptitle(f"Training history ({res}*{res})", fontsize=20)
         plt.show()
-
-    def get_best_epoch(self) -> Dict:
-        """
-        Returns the epoch with the highest validation accuracy.
-
-        Returns:
-            Dict: Contains the epoch number and the validation accuracy.
-        """
-        # TODO: Check this is correct
-        best_epoch = self.history["valid_accuracy"].index(
-            max(self.history["valid_accuracy"])
-        )
-        best_accuracy = max(self.history["valid_accuracy"])
-        return {"best_epoch": best_epoch, "best_accuracy": best_accuracy}

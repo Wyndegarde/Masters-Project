@@ -21,7 +21,9 @@ class ScnnNet(nn.Module):
         num_steps: int = ModelParameters.NUM_STEPS,
         conv_kernel_size: int = ModelParameters.CONV_KERNEL_SIZE,
         conv_padding_size: int = ModelParameters.CONV_PADDING_SIZE,
+        conv_stride: int = ModelParameters.CONV_STRIDE,
         mp_kernel_size: int = ModelParameters.MP_KERNEL_SIZE,
+        mp_padding: int = ModelParameters.MP_PADDING_SIZE,
         mp_stride_length: int = ModelParameters.MP_STRIDE_LENGTH,
         dropout: float = ModelParameters.DROPOUT,
         num_hidden: int = ModelParameters.NUM_HIDDEN,
@@ -36,7 +38,9 @@ class ScnnNet(nn.Module):
         self.num_steps = num_steps
         self.conv_kernel_size = conv_kernel_size
         self.conv_padding_size = conv_padding_size
+        self.conv_stride = conv_stride
         self.mp_kernel_size = mp_kernel_size
+        self.mp_padding = mp_padding
         self.mp_stride_length = mp_stride_length
         self.dropout = dropout
         self.num_hidden = num_hidden
@@ -46,7 +50,9 @@ class ScnnNet(nn.Module):
             self.res,
             self.conv_kernel_size,
             self.conv_padding_size,
+            self.conv_stride,
             self.mp_kernel_size,
+            self.mp_padding,
             self.mp_stride_length,
         )
         # Do I change channels to a variable incase I end up with RGB images? ## Padding = 0 as all information is at the centre of image (may change if lower resolution)
@@ -115,27 +121,17 @@ class ScnnNet(nn.Module):
 
     def forward(self, x: Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
 
-        spk1, mem1 = self.lif1.init_leaky(
-            self.batch_size, 64, self.output_sizes[0], self.output_sizes[0]
-        )
-        spk2, mem2 = self.lif2.init_leaky(
-            self.batch_size, 128, self.output_sizes[1], self.output_sizes[1]
-        )
-        spk3, mem3 = self.lif3.init_leaky(
-            self.batch_size, 128, self.output_sizes[2], self.output_sizes[2]
-        )
-        spk4, mem4 = self.lif4.init_leaky(
-            self.batch_size, 256, self.output_sizes[3], self.output_sizes[3]
-        )
+        mem1 = self.lif1.init_leaky()
+        mem2 = self.lif2.init_leaky()
+        mem3 = self.lif3.init_leaky()
+        mem4 = self.lif4.init_leaky()
 
-        spk5, mem5 = self.lif5.init_leaky(
-            self.batch_size, 256, self.output_sizes[-1], self.output_sizes[-1]
-        )
+        mem5 = self.lif5.init_leaky()
 
-        spk6, mem6 = self.lif6.init_leaky(self.batch_size, self.num_hidden)
-        spk7, mem7 = self.lif7.init_leaky(self.batch_size, self.num_hidden)
+        mem6 = self.lif6.init_leaky()
+        mem7 = self.lif7.init_leaky()
 
-        spk8, mem8 = self.lif8.init_leaky(self.batch_size, self.num_outputs)
+        mem8 = self.lif8.init_leaky()
 
         spk8_rec = []
         mem8_rec = []

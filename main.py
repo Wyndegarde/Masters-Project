@@ -59,6 +59,8 @@ def main(model_type: str = "ANN"):
 
     history = training_handler.train_model()
 
+    # Plot the history
+
     print(history)
 
     return history

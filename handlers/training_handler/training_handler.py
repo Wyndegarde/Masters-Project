@@ -12,7 +12,7 @@ from snntorch import spikegen
 import snntorch.spikeplot as splt
 
 from services import TrainingServices
-from config import Config, LoguruSettings,TrainingParameters, ModelParameters
+from config import Config, LoguruSettings, TrainingParameters, ModelParameters
 
 log.add(
     LoguruSettings.TRAINING_HANDLER_LOG,
@@ -20,6 +20,7 @@ log.add(
     rotation=LoguruSettings.ROTATION,
     enqueue=True,
 )
+
 
 class TrainingHandler:
     def __init__(
@@ -70,7 +71,12 @@ class TrainingHandler:
         self.history: defaultdict = defaultdict(list)
 
     def train_model(self) -> defaultdict:
+        """
+        This method trains the selected model using the parameters defined in the config file.
 
+        Returns:
+            defaultdict: Contains the training and validation metrics for each epoch.
+        """
         start_time = time.time()
         print("Starting Training")
 
@@ -79,7 +85,6 @@ class TrainingHandler:
             avg_train_loss, correct = self._training_loop()
 
             avg_valid_loss, valid_correct = self._validation_loop()
-
 
             # Calculate average training loss and accuracy
             avg_train_loss /= self.train_num_batches
@@ -92,7 +97,7 @@ class TrainingHandler:
             self.add_metrics_to_history(
                 avg_train_loss, correct, avg_valid_loss, valid_correct
             )
-                
+
             if self.verbose == True:
                 TrainingServices.print_epoch_metrics(
                     epoch,
@@ -109,13 +114,19 @@ class TrainingHandler:
         time_taken = (end_time - start_time) / 60
 
         log.success(f"Training completed in {time_taken} minutes")
-        
+
         TrainingServices.print_final_metrics(
             accuracy, avg_train_loss, valid_accuracy, avg_valid_loss
         )
         return self.history
 
     def _training_loop(self) -> Tuple[float, float]:
+        """
+        Thiis method performs the training loop for a single epoch.
+
+        Returns:
+            Tuple[float, float]: Returns the average loss and number of correct predictions for the epoch.
+        """
         correct: float = 0.0
         avg_train_loss: float = 0.0
 
@@ -124,13 +135,18 @@ class TrainingHandler:
             # Zero out the gradients before passing to model
             self.optimizer.zero_grad()
 
+            # Move data to device (GPU if available)
             train_data = train_data.to(self.device)
             train_labels = train_labels.to(self.device)
 
+            # alternative method of passing data to model if spiking model
             if self.spiking_model:
 
+                # converts data to spikes and gets the output metrics
                 predicted, loss = self._spiking_training_loop(train_data, train_labels)
                 correct += (predicted == train_labels).type(torch.float).sum().item()
+
+            # if not a spike model, pass data to model as normal
             else:
                 # Get model output
                 predicted = self.model(train_data)
@@ -142,6 +158,7 @@ class TrainingHandler:
                 correct += (
                     (predicted.argmax(1) == train_labels).type(torch.float).sum().item()
                 )
+            # Add loss to average loss (avg to be calculated later)
             avg_train_loss += loss.item()
 
             # Backpropagation
@@ -151,6 +168,18 @@ class TrainingHandler:
         return (avg_train_loss, correct)
 
     def _spiking_training_loop(self, train_data, train_labels) -> Tuple[Tensor, Tensor]:
+        """
+        This method converts the data to spikes and passes it to the model for training.
+
+        Args:
+            train_data (DataLoader): Images used for training.
+            train_labels (DataLoader): Labels associated with each of the images.
+
+        Returns:
+            Tuple[Tensor, Tensor]: The predicted labels and the loss for the batch.
+        """
+
+        # Use rate encoding to convert data to spikes
         spike_data, spk_targets_it = self._rate_encoding(train_data, train_labels)
 
         spk_rec, mem_rec = self.model(spike_data)
@@ -159,19 +188,28 @@ class TrainingHandler:
         loss: Tensor = torch.zeros(
             (1), dtype=self.dtype, device=self.device
         )  # creates a 1D tensor to store total loss over time.
+
         for step in range(self.num_steps):
-            loss += self.loss_fn(
-                mem_rec[step], spk_targets_it
-            )  # Loss at each time step is added to give total loss.
+            # Loss at each time step is added to give total loss.
+            loss += self.loss_fn(mem_rec[step], spk_targets_it)
 
         _, predicted = spk_rec.sum(dim=0).max(1)
 
         return (predicted, loss)
 
     def _validation_loop(self) -> Tuple[float, float]:
+        """
+        This method performs the validation loop for a single epoch.
+
+        Returns:
+            Tuple[float, float]: The average loss and number of correct predictions for the validation data for the epoch.
+        """
+
+        # Initialize metrics
         valid_correct: float = 0.0
         avg_valid_loss: float = 0.0
 
+        # Set model to evaluation mode
         self.model.eval()
         with torch.no_grad():
             for valid_data, valid_labels in self.valid_loader:
@@ -179,7 +217,10 @@ class TrainingHandler:
                 valid_data = valid_data.to(self.device)
                 valid_labels = valid_labels.to(self.device)
 
+                # alternative method of passing data to model if spiking model
                 if self.spiking_model:
+
+                    # use the same method as training loop to pass data to spiking model
                     valid_predicted, valid_loss = self._spiking_training_loop(
                         valid_data, valid_labels
                     )
@@ -208,17 +249,29 @@ class TrainingHandler:
 
         # convert data to rate encoded spikes.
         spike_data = spikegen.rate(data, num_steps=self.num_steps, gain=1, offset=0)
+        # Convert targets to one-hot encoded spikes
         spk_targets = torch.clamp(spikegen.to_one_hot(targets, 10) * 1.05, min=0.05)
 
         return spike_data, spk_targets
 
     def add_metrics_to_history(
-        self, avg_train_loss, accuracy, avg_valid_loss, valid_accuracy
-    ):
+        self,
+        avg_train_loss: float,
+        accuracy: float,
+        avg_valid_loss: float,
+        valid_accuracy: float,
+    ) -> None:
+        """
+        Adds the metrics to the history dictionary.
+
+        Args:
+            avg_train_loss (float): average loss for the training data for the epoch.
+            accuracy (float): accuracy for the training data for the epoch.
+            avg_valid_loss (float): average loss for the validation data for the epoch.
+            valid_accuracy (float): accuracy for the validation data for the epoch.
+        """
 
         self.history["avg_train_loss"].append(avg_train_loss)
         self.history["train_accuracy"].append(accuracy)
         self.history["avg_valid_loss"].append(avg_valid_loss)
         self.history["valid_accuracy"].append(valid_accuracy)
-
-

@@ -18,6 +18,7 @@ class CnnNet(nn.Module):
         res: int = ModelParameters.RESOLUTION,
         conv_kernel_size: int = ModelParameters.CONV_KERNEL_SIZE,
         conv_padding_size: int = ModelParameters.CONV_PADDING_SIZE,
+        conv_stride: int = ModelParameters.CONV_STRIDE,
         mp_kernel_size: int = ModelParameters.MP_KERNEL_SIZE,
         mp_padding_size: int = ModelParameters.MP_PADDING_SIZE,
         mp_stride_length: int = ModelParameters.MP_STRIDE_LENGTH,
@@ -31,6 +32,7 @@ class CnnNet(nn.Module):
         self.res = res
         self.conv_kernel_size = conv_kernel_size
         self.conv_padding_size = conv_padding_size
+        self.conv_stride = conv_stride
         self.mp_kernel_size = mp_kernel_size
         self.mp_padding_size = mp_padding_size
         self.mp_stride_length = mp_stride_length
@@ -43,6 +45,7 @@ class CnnNet(nn.Module):
             self.res,
             self.conv_kernel_size,
             self.conv_padding_size,
+            self.conv_stride,
             self.mp_kernel_size,
             self.mp_padding_size,
             self.mp_stride_length,

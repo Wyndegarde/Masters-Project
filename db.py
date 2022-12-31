@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 
 # Connect to the MongoDB instance
-client: MongoClient = MongoClient("mongodb://localhost:27017")
+client: MongoClient = MongoClient("mongodb://root:example@localhost:27017")
 
 # Get a reference to the "test" database
 db = client.test

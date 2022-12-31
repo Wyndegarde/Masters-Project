@@ -1,13 +1,13 @@
-2022-12-30 15:24:56.783 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 15:40:26.862 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 15:43:34.514 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 15:59:15.244 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 16:01:28.240 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 18:11:18.448 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 18:12:52.466 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 20:22:26.617 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 25 | Using cuda as device
-2022-12-30 20:25:47.254 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-30 20:25:47.316 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 51 | Training a Deep Nueral Network
-2022-12-30 20:26:10.718 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-30 20:26:10.780 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 51 | Training a Deep Nueral Network
-2022-12-30 20:27:04.839 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 111 | Training completed in 0.8986397425333659 minutes
+2022-12-31 09:48:31.820 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-31 09:48:31.934 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
+2022-12-31 09:50:22.078 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-31 09:50:22.124 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
+2022-12-31 10:15:33.473 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-31 10:15:33.518 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
+2022-12-31 10:16:45.410 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-31 10:16:45.457 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
+2022-12-31 10:18:30.060 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-31 10:18:30.106 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
+2022-12-31 10:22:27.494 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
+2022-12-31 10:22:27.542 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
+2022-12-31 10:38:22.687 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 116 | Training completed in 15.91805157661438 minutes

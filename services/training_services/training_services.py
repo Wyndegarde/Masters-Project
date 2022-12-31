@@ -1,10 +1,33 @@
-from typing import Dict
-from torch import Tensor
+from typing import Tuple, List
 
 
 class TrainingServices:
     @staticmethod
-    def calculate_loss_metrics():
+    def get_best_epoch(valid_accuracy: List[float]) -> Tuple[int, float]:
+        """
+        This method finds the epoch with the highest accuracy.
+
+        Args:
+            valid_accuracy (List[float]): List of validation accuracies.
+
+        Returns:
+            Tuple[int, float]: The epoch with the highest accuracy and the accuracy.
+        """
+        best_idx = valid_accuracy.index(max(valid_accuracy))
+
+        best_epoch = best_idx + 1
+        best_valid_accuracy = valid_accuracy[best_idx]
+
+        return (best_epoch, best_valid_accuracy)
+
+    @staticmethod
+    def create_id():
+        """
+        This method creates a unique id for the training history using the model type, resolution, and training size
+
+        Returns:
+            str: Unique id for the training history
+        """
         pass
 
     @staticmethod
@@ -29,9 +52,16 @@ class TrainingServices:
 
     @staticmethod
     def print_final_metrics(
-        accuracy: float, avg_train_loss: float, valid_accuracy: float, avg_valid_loss: float
+        accuracy: float,
+        avg_train_loss: float,
+        valid_accuracy: float,
+        avg_valid_loss: float,
     ) -> None:
 
-        print(f"Training Results:\n Accuracy: {(accuracy):>0.1f}%, Avg loss: {avg_train_loss:>8f} \n")
+        print(
+            f"Training Results:\n Accuracy: {(accuracy):>0.1f}%, Avg loss: {avg_train_loss:>8f} \n"
+        )
         print("-" * 15)
-        print(f"Validation Results: \n Accuracy: {(valid_accuracy):>0.1f}%, Avg loss: {avg_valid_loss:>8f} \n")
+        print(
+            f"Validation Results: \n Accuracy: {(valid_accuracy):>0.1f}%, Avg loss: {avg_valid_loss:>8f} \n"
+        )

@@ -52,7 +52,7 @@ class ModelParameters:
 
     # SNN parameters
     SLOPE: int = 5
-    SPIKE_GRADIENT: surrogate = surrogate.fast_sigmoid(slope = SLOPE)
+    SPIKE_GRADIENT: surrogate = surrogate.fast_sigmoid(slope=SLOPE)
     NUM_STEPS: int = 10
     TIME_STEP: float = 1e-3
     TAU_MEM: float = 2e-2
@@ -62,7 +62,7 @@ class ModelParameters:
 class TrainingParameters:
     """Class to hold training parameters"""
 
-    RATIO: float = 1
+    RATIO: float = 1.0
     BATCH_SIZE: int = 64
     EPOCHS: int = 3
     LEARNING_RATE: float = 5e-4

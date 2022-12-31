@@ -1,12 +1,13 @@
 from typing import Any
 from loguru import logger as log
 
+import inquirer
+import numpy as np
+from datetime import datetime
 import torch
 import torch.nn as nn
-import numpy as np
-import inquirer
 
-from config import Config, LoguruSettings, TrainingParameters
+from config import Config, LoguruSettings, TrainingParameters, ModelParameters
 from handlers import DataHandler, TrainingHandler
 from models import AnnNet, CnnNet, SnnNet, ScnnNet
 
@@ -58,9 +59,16 @@ def main(model_type: str = "ANN"):
     )
 
     history = training_handler.train_model()
+    model_id = (
+        model_type
+        + "_Res"
+        + str(ModelParameters.RESOLUTION)
+        + "_Ratio"
+        + str(int(TrainingParameters.RATIO * 100))
+        + str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
+    )
 
-    # Plot the history
-
+    # TODO: Plot the history
     print(history)
 
     return history

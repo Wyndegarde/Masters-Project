@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, List
 from collections import defaultdict
 import time
 from loguru import logger as log
@@ -12,6 +12,7 @@ from snntorch import spikegen
 import snntorch.spikeplot as splt
 
 from services import TrainingServices
+from interfaces import TrainingHistory
 from config import Config, LoguruSettings, TrainingParameters, ModelParameters
 
 log.add(
@@ -67,16 +68,19 @@ class TrainingHandler:
         self.valid_size = len(self.valid_loader.dataset)  # type: ignore
         self.valid_num_batches = len(self.valid_loader)
 
-        # History dictionary to store the training metrics
-        self.history: defaultdict = defaultdict(list)
-
-    def train_model(self) -> defaultdict:
+    def train_model(self) -> TrainingHistory:
         """
         This method trains the selected model using the parameters defined in the config file.
 
         Returns:
             defaultdict: Contains the training and validation metrics for each epoch.
         """
+
+        train_losses: List[float] = []
+        train_accuracies: List[float] = []
+        valid_losses: List[float] = []
+        valid_accuracies: List[float] = []
+
         start_time = time.time()
         print("Starting Training")
 
@@ -94,9 +98,11 @@ class TrainingHandler:
             avg_valid_loss /= self.valid_num_batches
             valid_accuracy = valid_correct / self.valid_size * 100
 
-            self.add_metrics_to_history(
-                avg_train_loss, correct, avg_valid_loss, valid_correct
-            )
+            # Append epoch metrics to lists
+            train_losses.append(avg_train_loss)
+            train_accuracies.append(accuracy)
+            valid_losses.append(avg_valid_loss)
+            valid_accuracies.append(valid_accuracy)
 
             if self.verbose == True:
                 TrainingServices.print_epoch_metrics(
@@ -118,7 +124,22 @@ class TrainingHandler:
         TrainingServices.print_final_metrics(
             accuracy, avg_train_loss, valid_accuracy, avg_valid_loss
         )
-        return self.history
+
+        best_epoch, best_valid_accuracy = TrainingServices.get_best_epoch(
+            valid_accuracies
+        )
+
+        # Store all relevant information for the training history.
+        history = TrainingHistory(
+            best_epoch,
+            best_valid_accuracy,
+            train_accuracies,
+            train_losses,
+            valid_accuracies,
+            valid_losses,
+        )
+
+        return history
 
     def _training_loop(self) -> Tuple[float, float]:
         """
@@ -253,25 +274,3 @@ class TrainingHandler:
         spk_targets = torch.clamp(spikegen.to_one_hot(targets, 10) * 1.05, min=0.05)
 
         return spike_data, spk_targets
-
-    def add_metrics_to_history(
-        self,
-        avg_train_loss: float,
-        accuracy: float,
-        avg_valid_loss: float,
-        valid_accuracy: float,
-    ) -> None:
-        """
-        Adds the metrics to the history dictionary.
-
-        Args:
-            avg_train_loss (float): average loss for the training data for the epoch.
-            accuracy (float): accuracy for the training data for the epoch.
-            avg_valid_loss (float): average loss for the validation data for the epoch.
-            valid_accuracy (float): accuracy for the validation data for the epoch.
-        """
-
-        self.history["avg_train_loss"].append(avg_train_loss)
-        self.history["train_accuracy"].append(accuracy)
-        self.history["avg_valid_loss"].append(avg_valid_loss)
-        self.history["valid_accuracy"].append(valid_accuracy)

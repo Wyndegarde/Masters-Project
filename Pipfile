@@ -32,6 +32,7 @@ black = "*"
 snntorch = "*"
 inquirer = "*"
 pymongo = "*"
+pytest = "*"
 
 [dev-packages]
 mypy = "*"

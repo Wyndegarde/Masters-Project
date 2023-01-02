@@ -157,3 +157,4 @@ cython_debug/
 
 # all files in db directory
 data/db
+old/

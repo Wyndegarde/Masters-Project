@@ -1,16 +1,24 @@
-2022-12-31 09:48:31.820 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-31 09:48:31.934 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
-2022-12-31 09:50:22.078 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-31 09:50:22.124 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
-2022-12-31 10:15:33.473 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-31 10:15:33.518 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
-2022-12-31 10:16:45.410 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-31 10:16:45.457 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
-2022-12-31 10:18:30.060 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-31 10:18:30.106 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
-2022-12-31 10:22:27.494 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 26 | Using cuda as device
-2022-12-31 10:22:27.542 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 45 | Training a Spiking Nueral Network
-2022-12-31 10:38:22.687 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 116 | Training completed in 15.91805157661438 minutes
-2022-12-31 17:10:10.450 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 30 | Using cuda as device
-2022-12-31 17:10:10.566 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 55 | Training a Deep Nueral Network
-2022-12-31 17:10:48.112 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 122 | Training completed in 0.6242348074913024 minutes
+2023-01-02 11:28:53.733 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 30 | Using cuda as device
+2023-01-02 11:28:53.808 | SUCCESS  | file: main.py -> path: __main__ -> function: main -> line: 35 | Data loaded in successfully
+2023-01-02 11:28:53.810 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 37 | Getting model configurations
+2023-01-02 11:28:53.931 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 49 | Beginning training of ANN model
+2023-01-02 11:29:32.801 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 124 | Training completed in 0.6477968692779541 minutes
+2023-01-02 11:29:32.805 | SUCCESS  | file: main.py -> path: __main__ -> function: main -> line: 51 | ANN model trained successfully
+2023-01-02 11:29:32.807 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 56 | Connecting to MongoDB
+2023-01-02 11:30:02.885 | ERROR    | file: main.py -> path: __main__ -> function: main -> line: 60 | Could not connect to database
+2023-01-02 11:32:01.604 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 28 | Using cuda as device
+2023-01-02 11:32:01.649 | SUCCESS  | file: main.py -> path: __main__ -> function: main -> line: 33 | Data loaded in successfully
+2023-01-02 11:32:01.651 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 35 | Getting model configurations
+2023-01-02 11:32:01.729 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 47 | Beginning training of ANN model
+2023-01-02 11:32:37.437 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 124 | Training completed in 0.5951011816660563 minutes
+2023-01-02 11:32:37.442 | SUCCESS  | file: main.py -> path: __main__ -> function: main -> line: 49 | ANN model trained successfully
+2023-01-02 11:32:37.446 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 54 | Connecting to MongoDB
+2023-01-02 11:33:07.493 | ERROR    | file: main.py -> path: __main__ -> function: main -> line: 58 | Could not connect to database
+2023-01-02 11:35:44.857 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 28 | Using cuda as device
+2023-01-02 11:35:44.905 | SUCCESS  | file: main.py -> path: __main__ -> function: main -> line: 33 | Data loaded in successfully
+2023-01-02 11:35:44.907 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 35 | Getting model configurations
+2023-01-02 11:35:44.985 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 47 | Beginning training of ANN model
+2023-01-02 11:36:20.162 | SUCCESS  | file: training_handler.py -> path: handlers.training_handler.training_handler -> function: train_model -> line: 124 | Training completed in 0.5862508694330851 minutes
+2023-01-02 11:36:20.167 | SUCCESS  | file: main.py -> path: __main__ -> function: main -> line: 49 | ANN model trained successfully
+2023-01-02 11:36:20.169 | INFO     | file: main.py -> path: __main__ -> function: main -> line: 54 | Connecting to MongoDB
+2023-01-02 11:36:50.271 | ERROR    | file: main.py -> path: __main__ -> function: main -> line: 58 | Could not connect to database. History not saved

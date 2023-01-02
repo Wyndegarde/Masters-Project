@@ -1,5 +1,9 @@
 from typing import Tuple, List
 
+from datetime import datetime
+
+from config import TrainingParameters, ModelParameters
+
 
 class TrainingServices:
     @staticmethod
@@ -21,14 +25,9 @@ class TrainingServices:
         return (best_epoch, best_valid_accuracy)
 
     @staticmethod
-    def create_id():
-        """
-        This method creates a unique id for the training history using the model type, resolution, and training size
-
-        Returns:
-            str: Unique id for the training history
-        """
-        pass
+    def create_model_id(model_type: str) -> str:
+        model_id = f"{model_type}_Res{ModelParameters.RESOLUTION}_Ratio{int(TrainingParameters.RATIO * 100)}_{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}".lower()
+        return model_id
 
     @staticmethod
     def print_epoch_metrics(

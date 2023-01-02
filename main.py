@@ -4,14 +4,12 @@ from dataclasses import asdict
 
 import inquirer
 import numpy as np
-from datetime import datetime
 import torch
-import torch.nn as nn
+from pymongo.errors import ServerSelectionTimeoutError
 
 from interfaces import TrainingHistory
-from models import AnnNet, CnnNet, SnnNet, ScnnNet
 from handlers import DataHandler, DatabaseHandler, ModelHandler, TrainingHandler
-from config import Config, LoguruSettings, TrainingParameters, ModelParameters
+from config import Config, LoguruSettings
 
 
 log.add(
@@ -24,6 +22,7 @@ log.add(
 
 def main(model_type: str = "ANN"):
 
+    # Set the seed for reproducibility
     torch.manual_seed(Config.SEED)
     np.random.seed(Config.SEED)
 
@@ -32,10 +31,13 @@ def main(model_type: str = "ANN"):
     data_handler: DataHandler = DataHandler()
 
     train_data, validation_data = data_handler.load_in_data()
+    log.success("Data loaded in successfully")
 
+    log.info("Getting model configurations")
     model_config = ModelHandler(model_type)
 
     training_handler: TrainingHandler = TrainingHandler(
+        model_type,
         train_data,
         validation_data,
         model=model_config.model,
@@ -43,23 +45,23 @@ def main(model_type: str = "ANN"):
         spiking_model=model_config.spiking_model,
     )
 
+    log.info(f"Beginning training of {model_type} model")
     history: TrainingHistory = training_handler.train_model()
+    log.success(f"{model_type} model trained successfully")
 
+    # Convert the dataclass to a dictionary for saving to MongoDB
     history_dict = asdict(history)
 
-    model_id = f"{model_type}_Res{ModelParameters.RESOLUTION}_Ratio{int(TrainingParameters.RATIO * 100)}_{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}".lower()
-
-    history_dict["_id"] = model_id
-
+    # Requires MongoDB container to be running. If it's not, the history will not be saved
     try:
+        log.info("Connecting to MongoDB")
         client = DatabaseHandler()
         client.insert_history(history_dict)
-    except:
-        log.error("Could not connect to database")
-        raise
-
-    # TODO: Plot the history
-    print(history)
+    except ServerSelectionTimeoutError:
+        log.error("Could not connect to database. History not saved")
+    finally:
+        # TODO: Plot the history
+        print(history)
 
     return history
 

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class TrainingHistory:
+    _id: str
     best_epoch: int
     best_valid_accuracy: float
     train_accuracies: List[float]

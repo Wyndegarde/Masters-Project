@@ -26,6 +26,7 @@ log.add(
 class TrainingHandler:
     def __init__(
         self,
+        model_type: str,
         train_loader: DataLoader,
         valid_loader: DataLoader,
         model: nn.Module,
@@ -37,6 +38,7 @@ class TrainingHandler:
         spiking_model: bool = False,
     ) -> None:
 
+        self.model_type = model_type
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.device = device
@@ -125,12 +127,17 @@ class TrainingHandler:
             accuracy, avg_train_loss, valid_accuracy, avg_valid_loss
         )
 
+        # Get the best epoch and accuracy for the validation set.
         best_epoch, best_valid_accuracy = TrainingServices.get_best_epoch(
             valid_accuracies
         )
 
+        # Create a unique id for the model to be inserted to the db.
+        model_id = TrainingServices.create_model_id(self.model_type)
+
         # Store all relevant information for the training history.
         history = TrainingHistory(
+            model_id,
             best_epoch,
             best_valid_accuracy,
             train_accuracies,
